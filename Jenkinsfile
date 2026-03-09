@@ -1,19 +1,38 @@
 pipeline {
     agent any
+
+    tools {
+        maven 'maven-3.9'
+        jdk 'jdk11'
+    }
+
     stages {
-        stage('Build') {
+
+        stage('Checkout from GitHub') {
             steps {
-                sh 'mvn clean compile'
+                git branch: 'main',
+                    url: 'https://github.com/<username>/myapp.git'
             }
         }
-        stage('Test') {
+
+        stage('Maven Build') {
             steps {
-                sh 'mvn test'
+                sh 'mvn clean package -DskipTests'
             }
         }
-        stage('Package') {
+
+        stage('Build Docker Image') {
             steps {
-                sh 'mvn package'
+                sh 'docker build -t myapp:1.0 .'
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                sh '''
+                docker rm -f myapp-container || true
+                docker run -d -p 8080:8080 --name myapp-container myapp:1.0
+                '''
             }
         }
     }
