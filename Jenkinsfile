@@ -8,32 +8,23 @@ pipeline {
 
     stages {
 
-        stage('Checkout from GitHub') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/<username>/myapp.git'
-            }
-        }
-
         stage('Maven Build') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                sh 'mvn clean package'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t myapp:1.0 .'
+                sh 'docker build -t myapp2 .'
             }
         }
 
         stage('Run Docker Container') {
             steps {
-                sh '''
-                docker rm -f myapp-container || true
-                docker run -d -p 8080:8080 --name myapp-container myapp:1.0
-                '''
+                sh 'docker run -d -p 8080:8080 myapp2'
             }
         }
+
     }
 }
